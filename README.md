@@ -15,12 +15,12 @@ A Flutter application that helps pet owners identify and understand common pet s
   - Cat Facts API for interesting cat facts
   - Dog API for breed information and images
 - Search functionality to quickly find symptoms
-- Category-based filtering
-- Separate views for dog and cat symptoms
-- Responsive design for mobile, tablet, and desktop
-- Emergency vet contact button
+- Category-based filtering (Digestive, Skin, Movement, Urgent)
+- Pet type switching between dogs and cats
+- Responsive design for various screen sizes
 - Pull-to-refresh for latest data
-- Error handling and offline support
+- Emergency vet contact button
+- Clean and intuitive Material Design UI
 
 ## Project Structure
 
@@ -28,124 +28,106 @@ A Flutter application that helps pet owners identify and understand common pet s
 lib/
 ├── models/
 │   └── symptom.dart         # Data models
-├── services/
-│   └── pet_api_service.dart # API integration
 ├── repositories/
-│   └── symptom_repository.dart  # Data management
+│   └── symptom_repository.dart  # Data access layer
+├── services/
+│   └── pet_api_service.dart    # API integration
 ├── screens/
 │   ├── symptom_list_screen.dart    # Main list view
 │   └── symptom_detail_screen.dart  # Detailed symptom view
 └── main.dart               # App entry point
 ```
 
-## Setup Instructions
+## Technologies Used
+
+- Flutter SDK
+- Dart
+- HTTP package for API calls
+- Material Design
+- External APIs:
+  - Cat Facts API (https://cat-fact.herokuapp.com)
+  - Dog API (https://api.thedogapi.com)
+
+## Getting Started
 
 ### Prerequisites
 
-1. Install Flutter SDK:
-   ```bash
-   # macOS
-   brew install flutter
+- Flutter SDK (latest version)
+- Dart SDK (latest version)
+- An IDE (VS Code, Android Studio, or IntelliJ)
+- Git
 
-   # Windows
-   # Download Flutter SDK from https://flutter.dev/docs/get-started/install/windows
-   ```
+### Installation
 
-2. Verify installation:
-   ```bash
-   flutter doctor
-   ```
+1. Clone the repository:
+```bash
+git clone [repository-url]
+cd pet_symptom_guide
+```
 
-3. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/pet_symptom_guide.git
-   cd pet_symptom_guide
-   ```
+2. Install dependencies:
+```bash
+flutter pub get
+```
 
-4. Install dependencies:
-   ```bash
-   flutter pub get
-   ```
+3. Run the app:
+```bash
+# Debug mode
+flutter run
 
-### Running the App
-
-1. Run in debug mode:
-   ```bash
-   flutter run
-   ```
-
-2. Run in release mode:
-   ```bash
-   flutter run --release
-   ```
-
-3. Build for specific platforms:
-   ```bash
-   # Web
-   flutter build web
-
-   # Android
-   flutter build apk
-
-   # iOS
-   flutter build ios
-   ```
-
-## API Integration
-
-The app integrates with two public APIs:
-- [Cat Facts API](https://cat-fact.herokuapp.com) - For cat-related facts
-- [Dog API](https://api.thedogapi.com/v1) - For dog breeds and images
-
-No API keys are required for basic functionality.
+# Release mode
+flutter run --release
+```
 
 ## Architecture
 
-The application follows a clean architecture approach:
+The application follows a clean architecture approach with:
+
 - **Models**: Core business entities
+- **Repositories**: Data access layer managing both local and remote data
 - **Services**: API integration layer
-- **Repositories**: Data management and business logic
-- **Screens**: UI components and state management
+- **Screens**: UI components with state management
 
-## Testing
+## API Integration
 
-Run tests with:
-```bash
-flutter test
-```
+The app integrates with two APIs from the public-apis list:
 
-## Building for Production
+1. **Cat Facts API**
+   - Endpoint: https://cat-fact.herokuapp.com
+   - Used for: Retrieving interesting cat facts
 
-1. Web:
-   ```bash
-   flutter build web --release
-   ```
-   The output will be in `build/web`
+2. **Dog API**
+   - Endpoint: https://api.thedogapi.com
+   - Used for: Fetching dog breeds and random dog images
 
-2. Android:
-   ```bash
-   flutter build apk --release
-   ```
-   The APK will be in `build/app/outputs/flutter-apk/app-release.apk`
+## Features Implementation
 
-3. iOS:
-   ```bash
-   flutter build ios --release
-   ```
-   Open the generated Xcode project to archive and distribute
+### List Screen
+- Displays 10+ symptoms with scrollable list/grid view
+- Implements search and category filtering
+- Shows API-powered pet information
+- Responsive layout for different screen sizes
+
+### Detail Screen
+- Shows comprehensive symptom information
+- Includes risk level indicators
+- Lists possible causes and next steps
+- Features emergency contact button
+- Displays related symptoms
+
+## Future Enhancements
+
+- Offline support with local database
+- User authentication
+- Symptom history tracking
+- Multi-language support
+- Dark mode
+- Integration with veterinary appointment scheduling
 
 ## Contributing
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+Feel free to submit issues and enhancement requests.
 
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Contact
-
-For any questions or feedback, please open an issue in the GitHub repository.
