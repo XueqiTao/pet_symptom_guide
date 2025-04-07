@@ -94,49 +94,6 @@ class _SymptomListScreenState extends State<SymptomListScreen> {
     _loadSymptoms();
   }
 
-  Widget _buildAdditionalInfo() {
-    final petInfo = _repository.getAdditionalPetInfo(_selectedPetType);
-    if (petInfo.isEmpty) return const SizedBox.shrink();
-
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              petInfo['title'],
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            if (_selectedPetType == PetType.dog && petInfo['currentImage'] != null)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  petInfo['currentImage'],
-                  height: 200,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            if (_selectedPetType == PetType.cat && petInfo['facts'] != null)
-              ...(petInfo['facts'] as List).take(3).map((fact) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Text(
-                  "• ${fact['text'] ?? 'No fact available'}",
-                  style: const TextStyle(fontSize: 14),
-                ),
-              )),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -176,28 +133,53 @@ class _SymptomListScreenState extends State<SymptomListScreen> {
             padding: EdgeInsets.symmetric(
               horizontal: isTabletOrDesktop ? screenWidth * 0.1 : 16.0,
             ),
-            child: SizedBox(
-              height: 48,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: _categories.length,
-                itemBuilder: (context, index) {
-                  final category = _categories[index];
-                  final isSelected = category == _selectedCategory;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: FilterChip(
-                      label: Text(category),
-                      selected: isSelected,
-                      onSelected: (selected) {
-                        if (selected) {
-                          _changeCategory(category);
-                        }
+            child: Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 48,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _categories.length,
+                      itemBuilder: (context, index) {
+                        final category = _categories[index];
+                        final isSelected = category == _selectedCategory;
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: FilterChip(
+                            label: Text(category),
+                            selected: isSelected,
+                            onSelected: (selected) {
+                              if (selected) {
+                                _changeCategory(category);
+                              }
+                            },
+                          ),
+                        );
                       },
                     ),
-                  );
-                },
-              ),
+                  ),
+                ),
+                ToggleButtons(
+                  isSelected: [
+                    _selectedPetType == PetType.dog,
+                    _selectedPetType == PetType.cat,
+                  ],
+                  onPressed: (index) {
+                    _changePetType(index == 0 ? PetType.dog : PetType.cat);
+                  },
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text(PetType.dog.icon),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text(PetType.cat.icon),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 8),
@@ -225,14 +207,6 @@ class _SymptomListScreenState extends State<SymptomListScreen> {
                       padding: EdgeInsets.symmetric(
                         horizontal: isTabletOrDesktop ? screenWidth * 0.1 : 16.0,
                       ),
-                      sliver: SliverToBoxAdapter(
-                        child: _buildAdditionalInfo(),
-                      ),
-                    ),
-                    SliverPadding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: isTabletOrDesktop ? screenWidth * 0.1 : 16.0,
-                      ),
                       sliver: isTabletOrDesktop
                           ? SliverGrid(
                               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -248,7 +222,10 @@ class _SymptomListScreenState extends State<SymptomListScreen> {
                             )
                           : SliverList(
                               delegate: SliverChildBuilderDelegate(
-                                (context, index) => _buildSymptomCard(_symptoms[index]),
+                                (context, index) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 8),
+                                  child: _buildSymptomCard(_symptoms[index]),
+                                ),
                                 childCount: _symptoms.length,
                               ),
                             ),
@@ -259,73 +236,108 @@ class _SymptomListScreenState extends State<SymptomListScreen> {
             ),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedPetType.index,
-        onTap: (index) => _changePetType(PetType.values[index]),
-        items: [
-          BottomNavigationBarItem(
-            icon: Text(
-              '🐕',
-              style: TextStyle(
-                fontSize: isTabletOrDesktop ? 32 : 24,
-              ),
-            ),
-            label: PetType.dog.displayName,
-          ),
-          BottomNavigationBarItem(
-            icon: Text(
-              '🐈',
-              style: TextStyle(
-                fontSize: isTabletOrDesktop ? 32 : 24,
-              ),
-            ),
-            label: PetType.cat.displayName,
-          ),
-        ],
-      ),
     );
   }
 
   Widget _buildSymptomCard(Symptom symptom) {
     return Card(
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(16),
-        title: Text(
-          symptom.name,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
+      elevation: 2,
+      child: InkWell(
+        onTap: () => Navigator.pushNamed(
+          context,
+          '/symptom_details',
+          arguments: symptom,
+        ),
+        child: Container(
+          height: 160,
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Text(
+                      symptom.name,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: symptom.riskLevel.color.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      symptom.riskLevel.displayName,
+                      style: TextStyle(
+                        color: symptom.riskLevel.color,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Expanded(
+                child: Text(
+                  symptom.description,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    height: 1.3,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: Wrap(
+                      spacing: 8,
+                      children: symptom.applicableTo.map((type) => 
+                        Text(
+                          type.icon,
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ).toList(),
+                    ),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: () => Navigator.pushNamed(
+                      context,
+                      '/symptom_details',
+                      arguments: symptom,
+                    ),
+                    icon: const Icon(Icons.info_outline, size: 18),
+                    label: const Text('More Info'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Theme.of(context).primaryColor,
+                      side: BorderSide(
+                        color: Theme.of(context).primaryColor,
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 4,
+                      ),
+                      minimumSize: const Size(0, 32),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
-        subtitle: Text(
-          symptom.description,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
-        trailing: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 6,
-          ),
-          decoration: BoxDecoration(
-            color: Color(int.parse(
-                '0xFF${symptom.riskLevel.color.substring(1)}')),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            symptom.riskLevel.displayName,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        onTap: () {
-          Navigator.pushNamed(
-            context,
-            '/symptom-detail',
-            arguments: symptom.id,
-          );
-        },
       ),
     );
   }

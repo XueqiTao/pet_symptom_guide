@@ -1,133 +1,140 @@
 # Pet Symptom Guide
 
-A Flutter application that helps pet owners identify and understand common pet symptoms, providing guidance on severity levels and recommended next steps. The app integrates with the Cat Facts API and Dog API to provide additional pet-related information.
+A Flutter application designed to help pet owners identify and understand common symptoms in dogs and cats. Built with Flutter and integrating with the Infermedica API, this app provides a comprehensive guide for pet health monitoring.
 
-## Features
+## Screenshots
 
-- List of common pet symptoms with risk levels (Mild, Moderate, Urgent)
-- Detailed symptom information including:
-  - Description
+### List Screen
+![Symptom List Screen](assets/screenshots/list_screen.png)
+*Main screen showing the list of symptoms with search, filtering, and risk level indicators*
+
+### Detail Screen
+![Symptom Detail Screen](assets/screenshots/detail_screen.png)
+*Detailed view of a symptom showing risk level, description, causes, and recommended steps*
+
+## Key Features
+
+### Core Functionality
+- **Symptom Browsing**: Browse through a comprehensive list of common pet symptoms
+- **Detailed Information**: Access detailed information about each symptom including:
+  - Risk level assessment (Mild, Moderate, Urgent)
   - Possible causes
-  - Risk level indicators
   - Recommended next steps
   - Related symptoms
-- Integration with external APIs:
-  - Cat Facts API for interesting cat facts
-  - Dog API for breed information and images
-- Search functionality to quickly find symptoms
-- Category-based filtering (Digestive, Skin, Movement, Urgent)
-- Pet type switching between dogs and cats
-- Responsive design for various screen sizes
-- Pull-to-refresh for latest data
-- Emergency vet contact button
-- Clean and intuitive Material Design UI
+  - Common conditions
 
-## Project Structure
+### User Interface
+- **Intuitive Navigation**
+  - Category-based filtering (Digestive, Skin, Movement, Urgent)
+  - Pet type switching between dogs and cats (🐕/🐈)
+  - Search functionality for quick symptom lookup
+  - Risk level indicators with color coding:
+    - Mild: Green
+    - Moderate: Amber
+    - Urgent: Red
+  - Emergency contact button for urgent cases
 
+### Smart Features
+- **Intelligent Filtering**
+  - Pet-specific symptom display
+  - Category-based organization
+  - Risk level classification
+- **Search Capabilities**
+  - Real-time search results
+  - Search across symptom names and descriptions
+  - Category-aware search results
+
+## Technical Implementation
+
+### Architecture
 ```
 lib/
 ├── models/
-│   └── symptom.dart         # Data models
+│   ├── symptom.dart         # Data models for symptoms
+│   └── enums/              # Enums for risk levels and pet types
 ├── repositories/
-│   └── symptom_repository.dart  # Data access layer
+│   └── symptom_repository.dart  # Data access layer with caching
 ├── services/
-│   └── pet_api_service.dart    # API integration
+│   └── infermedica_api_service.dart  # API integration service
 ├── screens/
 │   ├── symptom_list_screen.dart    # Main list view
 │   └── symptom_detail_screen.dart  # Detailed symptom view
 └── main.dart               # App entry point
 ```
 
-## Technologies Used
+### Key Components
+- **SymptomRepository**: Implements singleton pattern for centralized data management
+- **InfermedicaApiService**: Handles API integration (simulated in current version)
+- **Symptom Model**: Comprehensive data model for symptom information
+- **Risk Level System**: Three-tier classification (Mild, Moderate, Urgent)
 
-- Flutter SDK
-- Dart
-- HTTP package for API calls
-- Material Design
-- External APIs:
-  - Cat Facts API (https://cat-fact.herokuapp.com)
-  - Dog API (https://api.thedogapi.com)
+### Data Management
+- In-memory caching for improved performance
+- Efficient filtering and search algorithms
+- Mock data implementation for development
+- Prepared for API integration
 
 ## Getting Started
 
 ### Prerequisites
-
 - Flutter SDK (latest version)
 - Dart SDK (latest version)
-- An IDE (VS Code, Android Studio, or IntelliJ)
-- Git
+- A code editor (VS Code, Android Studio, or IntelliJ)
 
 ### Installation
-
 1. Clone the repository:
-```bash
-git clone https://github.com/XueqiTao/pet_symptom_guide.git
-cd pet_symptom_guide
-```
+   ```bash
+   git clone [repository-url]
+   cd pet_symptom_guide
+   ```
 
 2. Install dependencies:
-```bash
-flutter pub get
-```
+   ```bash
+   flutter pub get
+   ```
 
-3. Run the app:
-```bash
-# Debug mode
-flutter run
+3. Run the application:
+   ```bash
+   flutter run
+   ```
 
-# Release mode
-flutter run --release
-```
+### Development Setup
+- Enable Flutter web support:
+  ```bash
+  flutter config --enable-web
+  ```
+- For Chrome debugging:
+  ```bash
+  flutter run -d chrome --web-renderer html
+  ```
 
-## Architecture
-
-The application follows a clean architecture approach with:
-
-- **Models**: Core business entities
-- **Repositories**: Data access layer managing both local and remote data
-- **Services**: API integration layer
-- **Screens**: UI components with state management
-
-## API Integration
-
-The app integrates with two APIs from the public-apis list:
-
-1. **Cat Facts API**
-   - Endpoint: https://cat-fact.herokuapp.com
-   - Used for: Retrieving interesting cat facts
-
-2. **Dog API**
-   - Endpoint: https://api.thedogapi.com
-   - Used for: Fetching dog breeds and random dog images
-
-## Features Implementation
-
-### List Screen
-- Displays 10+ symptoms with scrollable list/grid view
-- Implements search and category filtering
-- Shows API-powered pet information
-- Responsive layout for different screen sizes
-
-### Detail Screen
-- Shows comprehensive symptom information
-- Includes risk level indicators
-- Lists possible causes and next steps
-- Features emergency contact button
-- Displays related symptoms
+## Project Structure
+- `lib/models/`: Data structures and business logic
+- `lib/repositories/`: Data access and caching layer
+- `lib/screens/`: UI components and screens
+- `lib/services/`: External service integrations
+- `web/`: Web-specific configurations and assets
+- `assets/`: Images and other static resources
 
 ## Future Enhancements
-
-- Offline support with local database
-- User authentication
-- Symptom history tracking
-- Multi-language support
-- Dark mode
-- Integration with veterinary appointment scheduling
+- [ ] Real API integration with Infermedica
+- [ ] Offline support with local storage
+- [ ] User accounts for saving symptom history
+- [ ] Multi-language support
+- [ ] Dark mode support
+- [ ] Push notifications for symptom tracking
+- [ ] Integration with veterinary telemedicine services
 
 ## Contributing
-
-Feel free to submit issues and enhancement requests.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
-
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+- Flutter team for the excellent framework
+- Infermedica API for the medical knowledge base
+- Contributors and maintainers
+
+## Support
+For support, please open an issue in the repository or contact the maintainers.

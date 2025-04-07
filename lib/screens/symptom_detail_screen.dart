@@ -1,330 +1,330 @@
 import 'package:flutter/material.dart';
 import '../models/symptom.dart';
-import '../repositories/symptom_repository.dart';
 
-class SymptomDetailScreen extends StatefulWidget {
-  final String symptomId;
+class SymptomDetailScreen extends StatelessWidget {
+  final Symptom symptom;
 
-  const SymptomDetailScreen({super.key, required this.symptomId});
+  const SymptomDetailScreen({
+    super.key,
+    required this.symptom,
+  });
 
-  @override
-  State<SymptomDetailScreen> createState() => _SymptomDetailScreenState();
-}
-
-class _SymptomDetailScreenState extends State<SymptomDetailScreen> {
-  final SymptomRepository _repository = SymptomRepository();
-  Symptom? _symptom;
-  bool _isLoading = true;
-  String? _error;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadSymptom();
-  }
-
-  Future<void> _loadSymptom() async {
-    try {
-      final symptom = await _repository.getSymptomById(widget.symptomId);
-      setState(() {
-        _symptom = symptom;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _error = 'Error loading symptom: $e';
-        _isLoading = false;
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isTabletOrDesktop = screenWidth > 600;
-    final horizontalPadding = isTabletOrDesktop ? screenWidth * 0.1 : 16.0;
-
-    if (_isLoading) {
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text('Loading...'),
-          elevation: 0,
-          backgroundColor: Colors.transparent,
-        ),
-        body: const Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
-
-    if (_error != null) {
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text('Error'),
-          elevation: 0,
-          backgroundColor: Colors.transparent,
-        ),
-        body: Center(
-          child: Text(
-            _error!,
-            style: const TextStyle(color: Colors.red),
-          ),
-        ),
-      );
-    }
-
-    if (_symptom == null) {
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text('Symptom Not Found'),
-          elevation: 0,
-          backgroundColor: Colors.transparent,
-        ),
-        body: const Center(
-          child: Text('Symptom information not available'),
-        ),
-      );
-    }
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_symptom!.name),
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        leading: IconButton(
-          icon: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.grey[200],
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.arrow_back),
-          ),
-          onPressed: () => Navigator.pop(context),
+  Widget _buildSection({
+    required String title,
+    required Widget content,
+    Color? backgroundColor,
+    IconData? icon,
+  }) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: backgroundColor ?? Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: const Color(0xFFE5E7EB),
+          width: 1,
         ),
       ),
-      body: Stack(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          RefreshIndicator(
-            onRefresh: _loadSymptom,
-            child: SingleChildScrollView(
-              padding: EdgeInsets.fromLTRB(
-                horizontalPadding,
-                0,
-                horizontalPadding,
-                120,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildRiskLevelCard(_symptom!),
-                  const SizedBox(height: 16),
-                  _buildDescriptionCard(_symptom!),
-                  const SizedBox(height: 16),
-                  _buildPossibleCausesCard(_symptom!),
-                  const SizedBox(height: 16),
-                  _buildNextStepsCard(_symptom!),
-                  const SizedBox(height: 16),
-                  _buildRelatedSymptomsCard(_symptom!),
-                  const SizedBox(height: 80),
-                ],
-              ),
-            ),
-          ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: horizontalPadding,
-                vertical: 16,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, -5),
-                  ),
-                ],
-              ),
-              child: SafeArea(
-                child: ElevatedButton(
-                  onPressed: () {
-                    // TODO: Implement emergency vet contact
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Connecting to emergency vet service...'),
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFE57373),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    minimumSize: const Size(double.infinity, 50),
-                  ),
-                  child: const Text(
-                    'Contact Emergency Vet',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+          Row(
+            children: [
+              if (icon != null) ...[
+                Icon(
+                  icon,
+                  color: const Color(0xFF00856A),
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+              ],
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF111827),
                 ),
               ),
-            ),
+            ],
           ),
+          const SizedBox(height: 12),
+          content,
         ],
       ),
     );
   }
 
-  Widget _buildRiskLevelCard(Symptom symptom) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Color(int.parse('0xFF${symptom.riskLevel.color.substring(1)}')),
-                borderRadius: BorderRadius.circular(12),
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          symptom.name,
+          style: const TextStyle(
+            color: Color(0xFF111827),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        iconTheme: const IconThemeData(
+          color: Color(0xFF111827),
+        ),
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Risk Level Indicator
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Color(int.parse(
+                    symptom.riskLevel.backgroundColor.substring(1),
+                    radix: 16,
+                  ) + 0xFF000000),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Color(int.parse(
+                      symptom.riskLevel.textColor.substring(1),
+                      radix: 16,
+                    ) + 0xFF000000).withOpacity(0.2),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.warning_rounded,
+                      color: Color(int.parse(
+                        symptom.riskLevel.textColor.substring(1),
+                        radix: 16,
+                      ) + 0xFF000000),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Risk Level: ${symptom.riskLevel.displayName}',
+                      style: TextStyle(
+                        color: Color(int.parse(
+                          symptom.riskLevel.textColor.substring(1),
+                          radix: 16,
+                        ) + 0xFF000000),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              child: Text(
-                symptom.riskLevel.displayName,
-                style: const TextStyle(
+              const SizedBox(height: 16),
+
+              // Description
+              _buildSection(
+                title: 'Description',
+                icon: Icons.description_outlined,
+                backgroundColor: Colors.white,
+                content: Text(
+                  symptom.description,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Color(0xFF374151),
+                  ),
+                ),
+              ),
+
+              // Possible Causes
+              _buildSection(
+                title: 'Possible Causes',
+                icon: Icons.help_outline,
+                backgroundColor: Colors.white,
+                content: Column(
+                  children: symptom.possibleCauses.map((cause) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 6,
+                          height: 6,
+                          margin: const EdgeInsets.only(top: 8, right: 8),
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF00856A),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        Expanded(
+                          child: Text(
+                            cause,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Color(0xFF374151),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )).toList(),
+                ),
+              ),
+
+              // Next Steps
+              _buildSection(
+                title: 'Recommended Next Steps',
+                icon: Icons.assignment_outlined,
+                backgroundColor: const Color(0xFFF3FAFA),
+                content: Text(
+                  symptom.nextSteps,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Color(0xFF374151),
+                  ),
+                ),
+              ),
+
+              // Common Conditions
+              _buildSection(
+                title: 'Common Conditions',
+                icon: Icons.medical_services_outlined,
+                backgroundColor: Colors.white,
+                content: Column(
+                  children: symptom.commonConditions.map((condition) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 6,
+                          height: 6,
+                          margin: const EdgeInsets.only(top: 8, right: 8),
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF00856A),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        Expanded(
+                          child: Text(
+                            condition,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Color(0xFF374151),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )).toList(),
+                ),
+              ),
+
+              // Related Symptoms
+              _buildSection(
+                title: 'Related Symptoms',
+                icon: Icons.link,
+                backgroundColor: Colors.white,
+                content: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: symptom.relatedSymptoms.map((related) => Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF3FAFA),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: const Color(0xFFE5E7EB),
+                      ),
+                    ),
+                    child: Text(
+                      related,
+                      style: const TextStyle(
+                        color: Color(0xFF00856A),
+                        fontSize: 14,
+                      ),
+                    ),
+                  )).toList(),
+                ),
+              ),
+
+              // Applicable To
+              _buildSection(
+                title: 'Applicable To',
+                icon: Icons.pets,
+                backgroundColor: Colors.white,
+                content: Row(
+                  children: symptom.applicableTo.map((type) => Padding(
+                    padding: const EdgeInsets.only(right: 16),
+                    child: Row(
+                      children: [
+                        Text(
+                          type.icon,
+                          style: const TextStyle(fontSize: 24),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          type.displayName,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Color(0xFF374151),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )).toList(),
+                ),
+              ),
+              const SizedBox(height: 80), // Space for bottom bar
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: Container(
+        color: Colors.white,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Emergency contact feature coming soon'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                },
+                icon: const Icon(
+                  Icons.emergency,
                   color: Colors.white,
-                  fontWeight: FontWeight.bold,
+                ),
+                label: const Text(
+                  'Emergency Contact',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFDC2626),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                 ),
               ),
             ),
-            const SizedBox(width: 16),
-            const Text(
-              'Risk Level',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDescriptionCard(Symptom symptom) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Description',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(symptom.description),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPossibleCausesCard(Symptom symptom) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Possible Causes',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            ...symptom.possibleCauses.map((cause) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: Row(
-                children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: Colors.blue[300],
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(child: Text(cause)),
-                ],
-              ),
-            )),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNextStepsCard(Symptom symptom) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Recommended Next Steps',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(symptom.nextSteps),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRelatedSymptomsCard(Symptom symptom) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Related Symptoms',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: symptom.relatedSymptoms.map((relatedSymptom) {
-                return Chip(
-                  label: Text(relatedSymptom),
-                  backgroundColor: Colors.blue[50],
-                );
-              }).toList(),
-            ),
-          ],
+          ),
         ),
       ),
     );

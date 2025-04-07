@@ -1,15 +1,15 @@
 import '../models/symptom.dart';
-import '../services/pet_api_service.dart';
+import '../services/infermedica_api_service.dart';
 
 class SymptomRepository {
-  final PetApiService _apiService = PetApiService();
+  final InfermedicaApiService _apiService = InfermedicaApiService();
   
   // Singleton pattern
   static final SymptomRepository _instance = SymptomRepository._internal();
   factory SymptomRepository() => _instance;
   SymptomRepository._internal();
 
-  // In-memory cache of symptoms and additional pet data
+  // In-memory cache of symptoms
   final List<Symptom> _symptoms = [
     // DIGESTIVE SYMPTOMS
     Symptom(
@@ -27,6 +27,9 @@ class SymptomRepository {
       nextSteps: 'If vomiting persists for more than 24 hours or is accompanied by other symptoms like lethargy or diarrhea, seek veterinary care immediately.',
       relatedSymptoms: ['Diarrhea', 'Lethargy', 'Loss of appetite'],
       applicableTo: [PetType.dog, PetType.cat],
+      category: 'Digestive',
+      commonConditions: ['Gastroenteritis', 'Pancreatitis', 'Kidney Disease'],
+      severity: 'moderate',
     ),
     Symptom(
       id: 'dig1',
@@ -43,6 +46,9 @@ class SymptomRepository {
       nextSteps: 'Ensure access to fresh water to prevent dehydration. If diarrhea persists more than 24 hours or contains blood, seek immediate veterinary care.',
       relatedSymptoms: ['Vomiting', 'Lethargy', 'Dehydration'],
       applicableTo: [PetType.dog, PetType.cat],
+      category: 'Digestive',
+      commonConditions: ['Gastroenteritis', 'Parasites', 'IBD'],
+      severity: 'moderate',
     ),
     
     // DOG-SPECIFIC DIGESTIVE
@@ -60,6 +66,9 @@ class SymptomRepository {
       nextSteps: 'If abdomen is hard and swollen, especially in large breeds, seek emergency veterinary care immediately as this could be life-threatening GDV.',
       relatedSymptoms: ['Retching without vomiting', 'Restlessness', 'Rapid breathing'],
       applicableTo: [PetType.dog],
+      category: 'Digestive',
+      commonConditions: ['GDV', 'Bloat', 'Intestinal Blockage'],
+      severity: 'severe',
     ),
 
     // CAT-SPECIFIC DIGESTIVE
@@ -77,6 +86,9 @@ class SymptomRepository {
       nextSteps: 'Regular grooming and specialized hairball prevention food can help. If cat is repeatedly retching without producing hairballs, consult vet.',
       relatedSymptoms: ['Constipation', 'Loss of appetite', 'Lethargy'],
       applicableTo: [PetType.cat],
+      category: 'Digestive',
+      commonConditions: ['Hairball Obstruction', 'Gastrointestinal Motility Disorder'],
+      severity: 'mild',
     ),
 
     // SKIN SYMPTOMS
@@ -95,6 +107,9 @@ class SymptomRepository {
       nextSteps: 'Check for visible parasites, consider an oatmeal bath. If hot spots develop or scratching is severe, consult a veterinarian.',
       relatedSymptoms: ['Hair loss', 'Skin redness', 'Hot spots'],
       applicableTo: [PetType.dog],
+      category: 'Skin',
+      commonConditions: ['Allergies', 'Flea Infestation', 'Hot Spots'],
+      severity: 'mild',
     ),
     Symptom(
       id: 'skin1c',
@@ -111,6 +126,9 @@ class SymptomRepository {
       nextSteps: 'Check for fleas, monitor grooming habits. If excessive grooming continues or bald spots develop, consult a veterinarian.',
       relatedSymptoms: ['Over-grooming', 'Hair loss', 'Skin lesions'],
       applicableTo: [PetType.cat],
+      category: 'Skin',
+      commonConditions: ['Allergies', 'Flea Infestation', 'Psychogenic Alopecia'],
+      severity: 'mild',
     ),
 
     // MOVEMENT SYMPTOMS
@@ -129,6 +147,9 @@ class SymptomRepository {
       nextSteps: 'Rest and restrict activity. If limping persists more than 24 hours or shows signs of severe pain, seek veterinary care.',
       relatedSymptoms: ['Pain', 'Swelling', 'Reluctance to move'],
       applicableTo: [PetType.dog, PetType.cat],
+      category: 'Movement',
+      commonConditions: ['Arthritis', 'Ligament Injury', 'Joint Disease'],
+      severity: 'moderate',
     ),
 
     // DOG-SPECIFIC MOVEMENT
@@ -146,6 +167,9 @@ class SymptomRepository {
       nextSteps: 'If you notice persistent mobility issues, especially in large breeds or older dogs, consult your vet for evaluation and treatment options.',
       relatedSymptoms: ['Limping', 'Decreased activity', 'Muscle loss in hind legs'],
       applicableTo: [PetType.dog],
+      category: 'Movement',
+      commonConditions: ['Hip Dysplasia', 'Osteoarthritis', 'Degenerative Joint Disease'],
+      severity: 'moderate',
     ),
 
     // CAT-SPECIFIC MOVEMENT
@@ -163,6 +187,9 @@ class SymptomRepository {
       nextSteps: 'Monitor changes in jumping behavior. If your cat shows consistent reluctance to jump or signs of pain, consult your veterinarian.',
       relatedSymptoms: ['Limping', 'Reduced activity', 'Changes in litter box habits'],
       applicableTo: [PetType.cat],
+      category: 'Movement',
+      commonConditions: ['Arthritis', 'Joint Disease', 'Muscle Atrophy'],
+      severity: 'moderate',
     ),
 
     // URGENT SYMPTOMS
@@ -181,52 +208,56 @@ class SymptomRepository {
       nextSteps: 'This is an emergency - seek immediate veterinary care. Monitor breathing rate and keep pet calm during transport.',
       relatedSymptoms: ['Coughing', 'Blue gums', 'Lethargy'],
       applicableTo: [PetType.dog, PetType.cat],
+      category: 'Urgent',
+      commonConditions: ['Heart Failure', 'Asthma', 'Respiratory Infection'],
+      severity: 'severe',
     ),
   ];
 
-  // Cache for API data
-  List<Map<String, dynamic>>? _catFacts;
-  List<Map<String, dynamic>>? _dogBreeds;
-  String? _currentDogImage;
+  // Cache for symptoms to avoid unnecessary API calls
+  List<Symptom> _cachedSymptoms = [];
 
-  // Get all symptoms with enriched data
+  // Get all symptoms
   Future<List<Symptom>> getAllSymptoms() async {
-    await _loadApiData();
     return List.from(_symptoms);
   }
 
-  // Get symptoms by pet type with enriched data
+  // Get symptoms by pet type
   Future<List<Symptom>> getSymptomsByPetType(PetType petType) async {
-    await _loadApiData();
     return _symptoms.where((symptom) => 
       symptom.applicableTo.contains(petType)
     ).toList();
   }
 
-  // Get symptoms by category with enriched data
+  // Get symptoms by category
   Future<List<Symptom>> getSymptomsByCategory(String category, PetType petType) async {
-    await _loadApiData();
-    if (category == 'All Symptoms') {
-      return getSymptomsByPetType(petType);
+    try {
+      // If we have cached data, filter it
+      if (_cachedSymptoms.isNotEmpty) {
+        if (category == 'All Symptoms') {
+          return _cachedSymptoms.where((s) => s.applicableTo.contains(petType)).toList();
+        }
+        return _cachedSymptoms
+            .where((s) => s.category == category && s.applicableTo.contains(petType))
+            .toList();
+      }
+
+      // If no cached data, load from API
+      await _loadSymptoms();
+      
+      if (category == 'All Symptoms') {
+        return _cachedSymptoms.where((s) => s.applicableTo.contains(petType)).toList();
+      }
+      return _cachedSymptoms
+          .where((s) => s.category == category && s.applicableTo.contains(petType))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to load symptoms: $e');
     }
-    
-    return _symptoms.where((symptom) => 
-      symptom.applicableTo.contains(petType) &&
-      _getCategoryForSymptom(symptom.id) == category
-    ).toList();
   }
 
-  String _getCategoryForSymptom(String id) {
-    if (id.startsWith('dig')) return 'Digestive';
-    if (id.startsWith('skin')) return 'Skin';
-    if (id.startsWith('mov')) return 'Movement';
-    if (id.startsWith('urg')) return 'Urgent';
-    return 'All Symptoms';
-  }
-
-  // Get symptom by ID with enriched data
+  // Get symptom by ID
   Future<Symptom?> getSymptomById(String id) async {
-    await _loadApiData();
     try {
       return _symptoms.firstWhere((symptom) => symptom.id == id);
     } catch (e) {
@@ -234,48 +265,43 @@ class SymptomRepository {
     }
   }
 
-  // Search symptoms with enriched data
-  Future<List<Symptom>> searchSymptoms(String query, {PetType? petType}) async {
-    await _loadApiData();
-    final lowercaseQuery = query.toLowerCase();
-    return _symptoms.where((symptom) =>
-      (petType == null || symptom.applicableTo.contains(petType)) &&
-      (symptom.name.toLowerCase().contains(lowercaseQuery) ||
-       symptom.description.toLowerCase().contains(lowercaseQuery))
-    ).toList();
-  }
-
-  // Load data from APIs
-  Future<void> _loadApiData() async {
+  // Search symptoms
+  Future<List<Symptom>> searchSymptoms(String query, {required PetType petType}) async {
     try {
-      // Load cat facts if not cached
-      _catFacts ??= await _apiService.getCatFacts();
-      
-      // Load dog breeds if not cached
-      _dogBreeds ??= await _apiService.getDogBreeds();
-      
-      // Get a new random dog image
-      _currentDogImage = await _apiService.getRandomDogImage();
+      if (_cachedSymptoms.isEmpty) {
+        await _loadSymptoms();
+      }
+
+      final normalizedQuery = query.toLowerCase();
+      return _cachedSymptoms
+          .where((symptom) =>
+              symptom.applicableTo.contains(petType) &&
+              (symptom.name.toLowerCase().contains(normalizedQuery) ||
+                  symptom.description.toLowerCase().contains(normalizedQuery) ||
+                  symptom.category.toLowerCase().contains(normalizedQuery)))
+          .toList();
     } catch (e) {
-      print('Error loading API data: $e');
-      // Continue with local data if API fails
+      throw Exception('Failed to search symptoms: $e');
     }
   }
 
-  // Get additional pet information
-  Map<String, dynamic> getAdditionalPetInfo(PetType petType) {
-    if (petType == PetType.cat && _catFacts != null) {
-      return {
-        'facts': _catFacts,
-        'title': 'Cat Facts',
-      };
-    } else if (petType == PetType.dog && _dogBreeds != null) {
-      return {
-        'breeds': _dogBreeds,
-        'currentImage': _currentDogImage,
-        'title': 'Dog Breeds',
-      };
+  // Get symptoms by risk level
+  Future<List<Symptom>> getSymptomsByRiskLevel(RiskLevel riskLevel) async {
+    return _symptoms.where((symptom) => symptom.riskLevel == riskLevel).toList();
+  }
+
+  Future<void> _loadSymptoms() async {
+    try {
+      // In a real app, this would be an API call
+      // For now, we'll use mock data
+      await Future.delayed(const Duration(milliseconds: 500)); // Simulate network delay
+      _cachedSymptoms = _getMockSymptoms();
+    } catch (e) {
+      throw Exception('Failed to load symptoms from API: $e');
     }
-    return {};
+  }
+
+  List<Symptom> _getMockSymptoms() {
+    return List.from(_symptoms);  // Return a copy of the existing symptoms list
   }
 } 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'screens/symptom_list_screen.dart';
 import 'screens/symptom_detail_screen.dart';
+import 'models/symptom.dart';
 
 void main() {
   runApp(const PetSymptomGuideApp());
@@ -15,15 +16,12 @@ class PetSymptomGuideApp extends StatelessWidget {
       title: 'Pet Symptom Guide',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primaryColor: const Color(0xFFFF4D00),
+        primaryColor: const Color(0xFF00856A),
         scaffoldBackgroundColor: const Color(0xFFF5F9FF),
         useMaterial3: true,
-        colorScheme: ColorScheme.light(
-          primary: const Color(0xFFFF4D00),
-          secondary: const Color(0xFFFFD7CC),
-          surface: Colors.white,
-          background: const Color(0xFFF5F9FF),
-          error: Colors.red[400]!,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF00856A),
+          primary: const Color(0xFF00856A),
         ),
         cardTheme: CardTheme(
           elevation: 0,
@@ -72,12 +70,18 @@ class PetSymptomGuideApp extends StatelessWidget {
         ),
       ),
       initialRoute: '/',
-      routes: {
-        '/': (context) => const SymptomListScreen(),
-        '/symptom-detail': (context) {
-          final symptomId = ModalRoute.of(context)!.settings.arguments as String;
-          return SymptomDetailScreen(symptomId: symptomId);
-        },
+      onGenerateRoute: (settings) {
+        if (settings.name == '/') {
+          return MaterialPageRoute(
+            builder: (context) => const SymptomListScreen(),
+          );
+        } else if (settings.name == '/symptom_details') {
+          final symptom = settings.arguments as Symptom;
+          return MaterialPageRoute(
+            builder: (context) => SymptomDetailScreen(symptom: symptom),
+          );
+        }
+        return null;
       },
     );
   }
