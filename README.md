@@ -5,11 +5,11 @@ A Flutter application designed to help pet owners identify and understand common
 ## Screenshots
 
 ### List Screen
-![Symptom List Screen](assets/screenshots/list_screen.png)
+![List Screen](https://raw.githubusercontent.com/XueqiTao/pet_symptom_guide/main/screenshots/list_screen.png)
 *Main screen showing the list of symptoms with search, filtering, and risk level indicators*
 
 ### Detail Screen
-![Symptom Detail Screen](assets/screenshots/detail_screen.png)
+![Detail Screen](https://raw.githubusercontent.com/XueqiTao/pet_symptom_guide/main/screenshots/detail_screen.png)
 *Detailed view of a symptom showing risk level, description, causes, and recommended steps*
 
 ## Key Features
@@ -84,7 +84,7 @@ lib/
 ### Installation
 1. Clone the repository:
    ```bash
-   git clone [repository-url]
+   git clone https://github.com/XueqiTao/pet_symptom_guide.git
    cd pet_symptom_guide
    ```
 
