@@ -1,6 +1,15 @@
 # Pet Symptom Guide
 
-A Flutter application designed to help pet owners identify and understand common symptoms in dogs and cats. Built with Flutter and integrating with the Infermedica API, this app provides a comprehensive guide for pet health monitoring.
+A Flutter application designed to help pet owners identify and understand common symptoms in dogs and cats. The app provides a user-friendly interface to search and filter through various symptoms, categorized by severity and type.
+
+## Features
+
+- 🐱🐶 Support for both cats and dogs
+- 🔍 Search functionality to quickly find specific symptoms
+- 📊 Symptoms categorized by system (Digestive, Skin, Movement, etc.)
+- ⚠️ Risk level indicators (Mild, Moderate, Urgent)
+- 🎨 Modern and intuitive UI design
+- 📱 Responsive layout for both mobile and desktop
 
 ## Screenshots
 
@@ -49,17 +58,18 @@ A Flutter application designed to help pet owners identify and understand common
 ### Architecture
 ```
 lib/
-├── models/
-│   ├── symptom.dart         # Data models for symptoms
-│   └── enums/              # Enums for risk levels and pet types
-├── repositories/
-│   └── symptom_repository.dart  # Data access layer with caching
-├── services/
-│   └── infermedica_api_service.dart  # API integration service
-├── screens/
-│   ├── symptom_list_screen.dart    # Main list view
-│   └── symptom_detail_screen.dart  # Detailed symptom view
-└── main.dart               # App entry point
+├── blocs/           # Business Logic Components
+│   ├── symptom_bloc.dart
+│   ├── symptom_event.dart
+│   └── symptom_state.dart
+├── models/          # Data models
+│   └── symptom.dart
+├── repositories/    # Data layer
+│   └── symptom_repository.dart
+├── screens/         # UI screens
+│   ├── symptom_list_screen.dart
+│   └── symptom_detail_screen.dart
+└── main.dart        # Application entry point
 ```
 
 ### Key Components
@@ -77,58 +87,75 @@ lib/
 ## Getting Started
 
 ### Prerequisites
-- Flutter SDK (latest version)
-- Dart SDK (latest version)
-- A code editor (VS Code, Android Studio, or IntelliJ)
+
+- Flutter SDK (latest stable version)
+- Chrome browser (for web development)
+- Git
 
 ### Installation
+
 1. Clone the repository:
-   ```bash
-   git clone https://github.com/XueqiTao/pet_symptom_guide.git
-   cd pet_symptom_guide
-   ```
+```bash
+git clone [your-repository-url]
+```
 
-2. Install dependencies:
-   ```bash
-   flutter pub get
-   ```
+2. Navigate to the project directory:
+```bash
+cd pet_symptom_guide
+```
 
-3. Run the application:
-   ```bash
-   flutter run
-   ```
+3. Install dependencies:
+```bash
+flutter pub get
+```
 
-### Development Setup
-- Enable Flutter web support:
-  ```bash
-  flutter config --enable-web
-  ```
-- For Chrome debugging:
-  ```bash
-  flutter run -d chrome --web-renderer html
-  ```
+4. Run the application:
+```bash
+flutter run -d chrome
+```
 
 ## Project Structure
-- `lib/models/`: Data structures and business logic
-- `lib/repositories/`: Data access and caching layer
-- `lib/screens/`: UI components and screens
-- `lib/services/`: External service integrations
-- `web/`: Web-specific configurations and assets
-- `assets/`: Images and other static resources
 
-## Future Enhancements
-- [ ] Real API integration with Infermedica
-- [ ] Offline support with local storage
-- [ ] User accounts for saving symptom history
-- [ ] Multi-language support
-- [ ] Dark mode support
-- [ ] Push notifications for symptom tracking
-- [ ] Integration with veterinary telemedicine services
+```
+lib/
+├── blocs/           # Business Logic Components
+│   ├── symptom_bloc.dart
+│   ├── symptom_event.dart
+│   └── symptom_state.dart
+├── models/          # Data models
+│   └── symptom.dart
+├── repositories/    # Data layer
+│   └── symptom_repository.dart
+├── screens/         # UI screens
+│   ├── symptom_list_screen.dart
+│   └── symptom_detail_screen.dart
+└── main.dart        # Application entry point
+```
+
+## Architecture
+
+The application follows the BLoC (Business Logic Component) pattern for state management:
+- **Models**: Define the data structures
+- **Repositories**: Handle data operations
+- **BLoCs**: Manage application state and business logic
+- **Screens**: Present the UI and handle user interactions
+
+## Dependencies
+
+- `flutter_bloc`: State management
+- `equatable`: Value equality comparison
+- Other Flutter standard libraries
 
 ## Contributing
-Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ## License
+
 This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Acknowledgments

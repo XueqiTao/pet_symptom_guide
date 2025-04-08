@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'screens/symptom_list_screen.dart';
 import 'screens/symptom_detail_screen.dart';
 import 'models/symptom.dart';
+import 'repositories/symptom_repository.dart';
+import 'blocs/symptom_bloc.dart';
+import 'blocs/symptom_event.dart';
 
 void main() {
-  runApp(const PetSymptomGuideApp());
+  runApp(const MyApp());
 }
 
-class PetSymptomGuideApp extends StatelessWidget {
-  const PetSymptomGuideApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +73,14 @@ class PetSymptomGuideApp extends StatelessWidget {
           ),
         ),
       ),
-      initialRoute: '/',
+      home: BlocProvider(
+        create: (context) {
+          final bloc = SymptomBloc(SymptomRepository())
+            ..add(LoadSymptoms());
+          return bloc;
+        },
+        child: const SymptomListScreen(),
+      ),
       onGenerateRoute: (settings) {
         if (settings.name == '/') {
           return MaterialPageRoute(
